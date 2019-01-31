@@ -10,8 +10,11 @@ address = ("127.0.0.1" , 8000)
 sock.connect(address)
 
 def imageProcess(image):
-    lower = (125, 0 ,200)
+    lower = (0, 0 ,190)
     upper = (130, 50, 255)
+
+    # lower = (120, 0 ,200)
+    # upper = (135, 50, 255)    
 
     # lower_pingpong = ()
     # upper_pingpong = 
@@ -20,8 +23,8 @@ def imageProcess(image):
     blur = cv2.GaussianBlur(image, (11,11), 0)
     hsvImage = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
     mask =  cv2.inRange(hsvImage, lower, upper)
-    mask = cv2.erode(mask, None , iterations = 2)
-    mask = cv2.dilate(mask, None , iterations = 2)
+    # mask = cv2.erode(mask, None , iterations = 2)
+    # mask = cv2.dilate(mask, None , iterations = 2)
     return mask
 
 def getContour(image):
@@ -58,8 +61,8 @@ def houghCircle(image):
     return circles
 
 
-cap = cv2.VideoCapture("psmovedemo.mov")
-#cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture("psmovedemo.mov")
+cap = cv2.VideoCapture(0)
 
 while(cap.isOpened()):
     ret, rgb = cap.read()
@@ -67,12 +70,18 @@ while(cap.isOpened()):
         break
     
     small = cv2.resize(rgb, (0,0), fx = 0.5, fy = 0.5)
+    small = cv2.flip(small, 1)
     height, width, _ = small.shape 
+
+##
+    hsvImage = cv2.cvtColor(rgb.copy(), cv2.COLOR_BGR2HSV)
+##
 
     frame = imageProcess(small)
     # frame = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
     con = getContour(frame)
     # cv2.drawContours(small, [con], -1, (0,255,0), 3)
+    print(hsvImage[0,0])
     if con is not None:
         ((x,y),radius) = cv2.minEnclosingCircle(con)
         cv2.circle(small,(int(x),int(y)), int(radius) ,(0,0,255),2)
@@ -84,7 +93,8 @@ while(cap.isOpened()):
         # y = ((y-(height/2))/(height/2)) * 127
         radius = ((36-radius)/72) * 255
 
-        print(x , y, radius)
+        #print(x , y, radius)
+        #print(hsvImage[0,0])
 
         data = bytearray()
         data.append(ctypes.c_uint8(int(x)).value)
@@ -104,7 +114,7 @@ while(cap.isOpened()):
     #     ###cv2.circle(circles_im,(i[0],i[1]),2,(0,0,255),3)
 
     cv2.imshow('frame', small)
-    # cv2.imshow('frame2', frame)
+    cv2.imshow('frame2', frame)
     
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
