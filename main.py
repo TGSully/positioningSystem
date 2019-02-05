@@ -10,10 +10,13 @@ address = ("127.0.0.1" , 8000)
 sock.connect(address)
 
 def imageProcess(image):
-    lower = (0, 0 ,190)
+    # lower = (0 , 0 ,220) # calibrated at I-Sense
+    # upper = (20 ,80, 255)
+
+    lower = (0, 0 ,190) #calibrated at Davids?
     upper = (130, 50, 255)
 
-    # lower = (120, 0 ,200)
+    # lower = (120, 0 ,200) # calibrated at taylors(pingpong?)?
     # upper = (135, 50, 255)    
 
     # lower_pingpong = ()
@@ -23,18 +26,18 @@ def imageProcess(image):
     blur = cv2.GaussianBlur(image, (11,11), 0)
     hsvImage = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
     mask =  cv2.inRange(hsvImage, lower, upper)
-    # mask = cv2.erode(mask, None , iterations = 2)
-    # mask = cv2.dilate(mask, None , iterations = 2)
+    mask = cv2.erode(mask, None , iterations = 2)
+    mask = cv2.dilate(mask, None , iterations = 2)
     return mask
 
 def getContour(image):
     frame, contours, h = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contour = None
-    great_circularity = 0
+    great_circularity = 0.75
     for con in contours:
         area = cv2.contourArea(con)
         perimeter = cv2.arcLength(con, True)
-        if area < 1000:
+        if area < 500:
             continue
         if perimeter == 0:
             continue
